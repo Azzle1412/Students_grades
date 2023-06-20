@@ -1,15 +1,18 @@
-package com.example.vos;
+package com.example.forms;
 import lombok.Data;
 
-@Data
-public class SingleScoreVo {
+import java.math.BigInteger;
 
-    /*private BigInteger studentId;*/
+@Data
+public class ScoreForm {
+
+    private BigInteger studentId;
     /*private BigInteger teacherId;*/
-    /*private String studentName;*/
-    private String teacherName;
+    private String studentName;
+    /*private String teacherName;*/
     private String term;
     private String courseName;
+    private String className;
     private Integer credit;
     private Integer normalScore;
     private Integer normalPercent;

@@ -1,5 +1,4 @@
 package com.example.controllers;
-import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import com.example.utils.MyPair;
 import com.example.forms.LoginForm;
 import com.example.pojos.Manager;
@@ -22,6 +21,7 @@ import java.math.BigInteger;
 @Slf4j
 @RestController
 @RequestMapping("/system")
+/*登录模块*/
 public class LoginController {
 
     @Autowired
@@ -40,60 +40,59 @@ public class LoginController {
         String password = loginForm.getPassword();
         Integer type = loginForm.getType();
 
-        if(type == 1){
-            MyPair<Manager> pair = checkManager(id,password);
-            if(pair.getFlag() == true) {
-                return Result.success(ResultEnum.SUCCESS_LOGIN,null);
+
+        if(type == 1){ // 管理员
+            MyPair<Boolean,Manager> pair = checkManager(id,password);
+            if(pair.getObj1() == true) {
+                return Result.success(ResultEnum.SUCCESS_LOGIN,"这是管理员");
             }
-            return Result.fail(ResultEnum.ERROR_LOGIN);
+            return Result.fail(ResultEnum.ERROR_LOGIN,"账号或者密码错误");
         }
-        else if(type == 2){
-            MyPair<Teacher> pair = checkTeacher(id,password);
-            if(pair.getFlag() == true) {
-                Teacher teacher = pair.getObj();
+        else if(type == 2){ // 教师
+            MyPair<Boolean,Teacher> pair = checkTeacher(id,password);
+            if(pair.getObj1() == true) {
+                Teacher teacher = pair.getObj2();
                 TeacherVo teacherVo =new TeacherVo();
                 BeanUtils.copyProperties(teacher,teacherVo);
                 return Result.success(ResultEnum.SUCCESS_LOGIN,teacherVo);
             }
-            return Result.fail(ResultEnum.ERROR_LOGIN);
-        }else if(type == 3){
-            MyPair<Student> pair = checkStudent(id,password);
-            if(pair.getFlag() == true) {
-                Student student = pair.getObj();
+            return Result.fail(ResultEnum.ERROR_LOGIN,"工号或者密码错误");
+        }
+        else if(type == 3){ // 学生
+            MyPair<Boolean,Student> pair = checkStudent(id,password);
+            if(pair.getObj1() == true) {
+                Student student = pair.getObj2();
                 StudentVo studentVo =new StudentVo();
                 BeanUtils.copyProperties(student,studentVo);
                 return Result.success(ResultEnum.SUCCESS_LOGIN,studentVo);
             }
-            return Result.fail(ResultEnum.ERROR_LOGIN);
+            return Result.fail(ResultEnum.ERROR_LOGIN,"学号或者密码错误");
         }
 
-        return Result.fail(ResultEnum.ERROR_LOGIN);
+        return Result.fail(ResultEnum.ERROR_LOGIN,"未知的登录失败");
     }
 
     private MyPair checkManager(BigInteger managerId,String password){
 
         Manager manager = managerService.getById(managerId);
 
-        MyPair<Manager> pair = new MyPair<>(false,null);
+        MyPair<Boolean,Manager> pair = new MyPair<>(false,null);
         if(manager != null && password.equals(manager.getPassword())){
-            pair.setFlag(true);
-            pair.setObj(manager);
-            return pair;
+            pair.setObj1(true);
+            pair.setObj2(manager);
         }
 
         return pair;
-
     }
 
     private MyPair checkTeacher(BigInteger teacherId,String password){
 
         Teacher teacher = teacherService.getById(teacherId);
 
-        MyPair<Teacher> pair = new MyPair<>(false,null);
+        MyPair<Boolean,Teacher> pair = new MyPair<>(false,null);
         if(teacher != null && password.equals(teacher.getPassword())){
-            pair.setFlag(true);
-            pair.setObj(teacher);
-            return pair;
+            pair.setObj1(true);
+            pair.setObj2(teacher);
         }
 
         return pair;
@@ -104,11 +103,10 @@ public class LoginController {
 
         Student student = studentService.getById(studentId);
 
-        MyPair<Student> pair = new MyPair<>(false,null);
+        MyPair<Boolean,Student> pair = new MyPair<>(false,null);
         if(student != null && password.equals(student.getPassword())){
-            pair.setFlag(true);
-            pair.setObj(student);
-            return pair;
+            pair.setObj1(true);
+            pair.setObj2(student);
         }
 
         return pair;

@@ -1,32 +1,17 @@
 package com.example.utils;
+import lombok.Data;
 
-public class MyPair<T> {
+@Data
+public class MyPair<T,K> {
 
-    private boolean flag;
-    private T obj;
-
-
+    private T obj1;
+    private K obj2;
 
     public MyPair() {}
 
-    public MyPair(boolean flag, T obj) {
-        this.flag = flag;
-        this.obj = obj;
+    public MyPair(T obj1, K obj2) {
+        this.obj1 = obj1;
+        this.obj2 = obj2;
     }
 
-    public boolean getFlag() {
-        return flag;
-    }
-
-    public void setFlag(boolean flag) {
-        this.flag = flag;
-    }
-
-    public T getObj() {
-        return obj;
-    }
-
-    public void setObj(T obj) {
-        this.obj = obj;
-    }
 }

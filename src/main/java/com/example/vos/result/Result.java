@@ -1,5 +1,6 @@
 package com.example.vos.result;
 import lombok.Data;
+import org.apache.ibatis.jdbc.Null;
 import org.springframework.lang.Nullable;
 
 
@@ -29,11 +30,9 @@ public class Result<T> {
 
     }
 
-    public static <T> Result fail(ResultEnum resultEnum){
+    public static <T> Result fail(ResultEnum resultEnum,@Nullable T data){
 
-        Result result = new Result(resultEnum.getCode()
-                ,resultEnum.getMsg()
-                , null);
+        Result result = new Result(resultEnum.getCode(),resultEnum.getMsg(),data);
 
         return result;
 

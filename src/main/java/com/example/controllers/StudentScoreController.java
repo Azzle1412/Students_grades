@@ -24,11 +24,13 @@ import java.util.stream.Collectors;
 @RestController
 @RequestMapping("/system/student-score")
 public class StudentScoreController {
-    @Autowired
-    private ScoreService scoreService;
 
     @Autowired
+    private ScoreService scoreService;
+    @Autowired
     private StudentService studentService;
+
+
 
     @GetMapping("/single/{studentId}")
     public Result singleScoreList(@RequestParam(defaultValue = "1") int pageIndex
@@ -41,7 +43,7 @@ public class StudentScoreController {
         IPage<Score> pageResult = scoreService.page(page,query);
 
         if(pageResult.getRecords()==null){
-            return Result.fail(ResultEnum.ERROR_FOUND);
+            return Result.fail(ResultEnum.ERROR_FOUND,"个人成绩列表为空");
         }
 
         List scoreVoList = pageResult.getRecords().stream().map(score->{
@@ -55,16 +57,19 @@ public class StudentScoreController {
         return Result.success(ResultEnum.SUCCESS_FOUND, pageResult);
     }
 
-    // 分页前端写死
+    // 分页的信息前端写死,后端就不再设置了
     @GetMapping("/monitor/{className}")
-    public Result monitorScoreList(@PathVariable String className){
-
+    public Result monitorScoreList(@RequestParam Integer monitorType
+            ,@PathVariable String className){
+        if(monitorType == 0){
+            return Result.fail(ResultEnum.ERROR_ACCESS,"没有班长的权限");
+        }
         QueryWrapper query = new QueryWrapper();
         query.eq("class_name",className);
         List<Score> scoreList = scoreService.list(query);
 
         if(scoreList.isEmpty()){
-            return Result.fail(ResultEnum.ERROR_FOUND);
+            return Result.fail(ResultEnum.ERROR_FOUND,"班级成绩列表为空");
         }
 
         HashMap<MyInfo,List<MyScore>> hashMap = new HashMap<>();

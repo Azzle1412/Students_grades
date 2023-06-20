@@ -19,7 +19,9 @@ import java.util.stream.Collectors;
 @Slf4j
 @RestController
 @RequestMapping("/system/admin-teacher")
+/*管理员管理教师信息的模块*/
 public class ManagerTeacherController {
+
     @Autowired
     private TeacherService teacherService;
     private IPage<Teacher> pageResult;
@@ -31,16 +33,24 @@ public class ManagerTeacherController {
 
         Teacher teacher = new Teacher();
         BeanUtils.copyProperties(teacherForm,teacher);
+
         BigInteger teacherId = teacher.getTeacherId();
 
         Teacher teacherQuery = teacherService.getById(teacherId);
 
         if(teacherQuery == null){
-            teacherService.save(teacher);
-            return Result.success(ResultEnum.SUCCESS_SAVE,teacher);
+            boolean flag = teacherService.save(teacher);
+            if(flag){
+                TeacherVo teacherVo = new TeacherVo();
+                BeanUtils.copyProperties(teacher,teacherVo);
+                return Result.success(ResultEnum.SUCCESS_SAVE,teacherVo);
+            }
+            else {
+                return Result.fail(ResultEnum.ERROR_SAVE,"teacher_table插入失败");
+            }
         }
 
-        return Result.fail(ResultEnum.ERROR_SAVE);
+        return Result.fail(ResultEnum.ERROR_SAVE,"该教师已经存在");
     }
 
     @DeleteMapping("/delete/{teacherId}")
@@ -49,11 +59,18 @@ public class ManagerTeacherController {
         Teacher teacher = teacherService.getById(teacherId);
 
         if(teacher != null){
-            teacherService.removeById(teacherId);
-            return Result.success(ResultEnum.SUCCESS_DELETE,teacher);
+            boolean flag = teacherService.removeById(teacherId);
+            if(flag){
+                TeacherVo teacherVo = new TeacherVo();
+                BeanUtils.copyProperties(teacher,teacherVo);
+                return Result.success(ResultEnum.SUCCESS_DELETE,teacherVo);
+            }
+            else{
+                return Result.fail(ResultEnum.ERROR_DELETE,"teacher_table删除失败");
+            }
         }
 
-        return Result.fail(ResultEnum.ERROR_DELETE);
+        return Result.fail(ResultEnum.ERROR_DELETE,"该教师信息不存在");
     }
 
     @PutMapping("/edit")
@@ -64,10 +81,12 @@ public class ManagerTeacherController {
 
         boolean flag = teacherService.updateById(teacher);
         if(flag){
+            TeacherVo teacherVo = new TeacherVo();
+            BeanUtils.copyProperties(teacher,teacherVo);
             return Result.success(ResultEnum.SUCCESS_EDIT,teacher);
         }
         else{
-            return Result.fail(ResultEnum.ERROR_EDIT);
+            return Result.fail(ResultEnum.ERROR_EDIT,"teacher_table修改失败");
         }
 
     }
@@ -78,7 +97,7 @@ public class ManagerTeacherController {
         Teacher teacher = teacherService.getById(teacherId);
 
         if(teacher == null){
-            return Result.fail(ResultEnum.ERROR_FOUND);
+            return Result.fail(ResultEnum.ERROR_FOUND,"该教师信息不存在");
         }
 
         TeacherVo teacherVo = new TeacherVo();
@@ -88,10 +107,8 @@ public class ManagerTeacherController {
     }
 
     @GetMapping("/list")
-    public Result  teacherList(@RequestParam(defaultValue = "1") int pageIndex
-            , @RequestParam(defaultValue = "4") int pageSize
-            , @RequestParam(defaultValue = "-1") BigInteger teacherId
-            ,@RequestParam(defaultValue = "*") String teacherName){
+    public Result  teacherList(@RequestParam(defaultValue = "1") int pageIndex, @RequestParam(defaultValue = "4") int pageSize
+            , @RequestParam(defaultValue = "-1") BigInteger teacherId,@RequestParam(defaultValue = "*") String teacherName){
 
 
         Page<Teacher> page = new Page<>(pageIndex,pageSize);
@@ -109,7 +126,7 @@ public class ManagerTeacherController {
         }
 
         if(pageResult.getRecords()==null){
-            return Result.fail(ResultEnum.ERROR_FOUND);
+            return Result.fail(ResultEnum.ERROR_FOUND,"教师信息列表为空");
         }
 
         List teacherVoList = pageResult.getRecords().stream().map(teacher->{
